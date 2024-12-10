@@ -15,7 +15,6 @@ def read_inputs() -> str:
 def scan_corrupt_mem(corrupt_mem: str) -> Tuple[int, int]:
     part1_result = 0
     part2_result = 0
-    # result = 0
     valid_instructions = re.findall(r'mul\(\d{1,3},\d{1,3}\)|do\(\)|don\'t\(\)', corrupt_mem)
     execute = True
     for instr in valid_instructions:
