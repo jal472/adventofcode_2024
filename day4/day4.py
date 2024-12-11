@@ -9,13 +9,15 @@ def read_inputs():
     for line in f:
         row = []
         for char in line:
+            if char == "\n":
+                continue
             row.append(char)
         _word_search.append(row)
     f.close()
-    global _row_width
-    _row_width = len(_word_search)-1
-    global _col_height
-    _col_height = len(_word_search[0])-1
+    global _row_bound
+    _row_bound = len(_word_search)-1
+    global _col_bound
+    _col_bound = len(_word_search[0])-1
 
 
 class Direction(Enum):
@@ -49,7 +51,7 @@ class Direction(Enum):
 
 def recursive_search(letter: str, position: Tuple[int, int], direction: Direction) -> int:
     r, c = position
-    if r < 0 or r > _row_width or c < 0 or c > _col_height:
+    if r < 0 or r > _row_bound or c < 0 or c > _col_bound:
         return 0
     # Calculate movement
     x, y = direction.move()
@@ -108,19 +110,12 @@ def count_xmas() -> int:
 
     return xmas_count
 
-
 def count_x_mas() -> int:
     xmas_count = 0
-    skip_list = []
     for r_idx, row in enumerate(_word_search):
         for c_idx, letter in enumerate(row):
             # skip the coordinates of MAS's that have already been found - make sure to not skip them when checking for the second MAS
-            if (r_idx, c_idx) in skip_list:
-                continue
             if letter == "M":
-                # UPPERLEFT
-                upperleft = Direction.UPPERLEFT.move()
-                upperleft_pos = (r_idx + upperleft[0], c_idx + upperleft[1])
                 # UPPERRIGHT
                 upperright = Direction.UPPERRIGHT.move()
                 upperright_pos = (r_idx + upperright[0], c_idx + upperright[1])
@@ -132,18 +127,21 @@ def count_x_mas() -> int:
                 lowerright_pos = (r_idx + lowerright[0], c_idx + lowerright[1])
                 # Search in diagonal directions and add to xmas count
                 # If MAS is found then we need to find the matching diagonal MAS that completes the X (make sure to add the position of the second found MAS to the skip_list)
-                if recursive_search("A", upperleft_pos, Direction.UPPERLEFT):  # noqa
-                    # UPPERLEFT: check two spaces up and two spaces left
-                    pass
+                # Don't check UPPERLEFT direction because other cases will cover these
                 if recursive_search("A", upperright_pos, Direction.UPPERRIGHT):  # noqa
-                    # UPPERRIGHT: check two spaces up and two spaces right
-                    pass
+                    # UPPERRIGHT: don't check two spaces up because this cross will have been found already; check two spaces right
+                    if recursive_search("M", (r_idx, c_idx+2), Direction.UPPERLEFT):
+                        xmas_count += 1
                 if recursive_search("A", lowerleft_pos, Direction.LOWERLEFT):  # noqa
-                    # LOWERLEFT: check two spaces down and two spaces left
-                    pass
+                    # LOWERLEFT: don't check two spaces left because this cross will have been found already; check two spaces down
+                    if recursive_search("M", (r_idx+2, c_idx), Direction.UPPERLEFT):
+                        xmas_count += 1
                 if recursive_search("A", lowerright_pos, Direction.LOWERRIGHT):  # noqa
-                    # LOWERRIGHT: check two spaces down and two spaces left
-                    pass
+                    # LOWERRIGHT: check two spaces down and two spaces right
+                    if recursive_search("M", (r_idx+2, c_idx), Direction.UPPERRIGHT):
+                        xmas_count += 1
+                    if recursive_search("M", (r_idx, c_idx+2), Direction.LOWERLEFT):
+                        xmas_count += 1
 
     return xmas_count
 
