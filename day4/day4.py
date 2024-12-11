@@ -1,7 +1,8 @@
 from typing import List, Tuple
 from enum import Enum, auto
 
-def read_inputs(): # -> List[List[str]]:
+
+def read_inputs():
     global _word_search
     _word_search = []
     f = open("input", "r")
@@ -12,10 +13,10 @@ def read_inputs(): # -> List[List[str]]:
         _word_search.append(row)
     f.close()
     global _row_width
-    _row_width = len(_word_search[0])-1
+    _row_width = len(_word_search)-1
     global _col_height
-    _col_height = len(_word_search)-1
-    # return word_search
+    _col_height = len(_word_search[0])-1
+
 
 class Direction(Enum):
     UP = auto()
@@ -48,58 +49,29 @@ class Direction(Enum):
 
 def recursive_search(letter: str, position: Tuple[int, int], direction: Direction) -> int:
     r, c = position
-    # print(position)
-    # print(f'Searching for \'{letter}\' at ({position[0]}, {position[1]}), searching right')
-    # If out of bounds return 0 for not found
-    print(position)
-    print(f'bounds: ({_row_width}, {_col_height})')
     if r < 0 or r > _row_width or c < 0 or c > _col_height:
-        # print("Out of bounds")
         return 0
     # Calculate movement
     x, y = direction.move()
     move_pos = (r + x, c + y)
-    # print(move_pos)
     # check that letter matches what we are looking for
     if _word_search[r][c] == letter:
         if letter == "M":
-            # print("'M' found")
-            # input("Press Enter to contine...")
             return recursive_search("A", move_pos, direction)
         elif letter == "A":
-            # print("'A' found")
-            # input("Press Enter to contine...")
             return recursive_search("S", move_pos, direction)
         elif letter == "S":
-            # print("'S' found - returning 1")
-            # input("Press Enter to contine...")
             return 1
-
-    #     # print("'M' found")
-    #     # # input("Press Enter to contine...")
-    #     return recursive_search("A", move_pos, direction)
-    # elif _word_search[r][c] == letter:
-    #     # print("'A' found")
-    #     # # input("Press Enter to contine...")
-    #     return recursive_search("S", move_pos, direction)
-    # # if we reached S then we have found a match, return 1
-    # elif _word_search[r][c] == letter:
-    #     # print("'S' found - returning 1")
-    #     # # input("Press Enter to contine...")
-    #     return 1
     # if letter does not match, return 0
     else:
-        # print("No match")
-        # input("Press Enter to contine...")
         return 0
 
-# def count_xmas(word_search: List[List[str]]) -> int:
+
 def count_xmas() -> int:
     xmas_count = 0
     for r_idx, row in enumerate(_word_search):
         for c_idx, letter in enumerate(row):
             if letter == "X":
-                # print("===========================")
                 # UP
                 up = Direction.UP.move()
                 up_pos = (r_idx + up[0], c_idx + up[1])
@@ -128,17 +100,16 @@ def count_xmas() -> int:
                 xmas_count += recursive_search("M", up_pos, Direction.UP)
                 xmas_count += recursive_search("M", down_pos, Direction.DOWN)
                 xmas_count += recursive_search("M", left_pos, Direction.LEFT)
-                # print(f'\'X\' at ({r_idx}, {c_idx}), searching right')
                 xmas_count += recursive_search("M", right_pos, Direction.RIGHT)
-                xmas_count += recursive_search("M", upperleft_pos, Direction.UPPERLEFT)
-                xmas_count += recursive_search("M", upperright_pos, Direction.UPPERRIGHT)
-                xmas_count += recursive_search("M", lowerleft_pos, Direction.LOWERLEFT)
-                xmas_count += recursive_search("M", lowerright_pos, Direction.LOWERRIGHT)
-                
+                xmas_count += recursive_search("M", upperleft_pos, Direction.UPPERLEFT)  # noqa
+                xmas_count += recursive_search("M", upperright_pos, Direction.UPPERRIGHT)  # noqa
+                xmas_count += recursive_search("M", lowerleft_pos, Direction.LOWERLEFT)  # noqa
+                xmas_count += recursive_search("M", lowerright_pos, Direction.LOWERRIGHT)  # noqa
+
     return xmas_count
+
 
 if __name__ == "__main__":
     read_inputs()
-    # xmas_count = count_xmas(_word_search)
     xmas_count = count_xmas()
-    print(xmas_count)
+    print(f'Part1: {xmas_count}')
